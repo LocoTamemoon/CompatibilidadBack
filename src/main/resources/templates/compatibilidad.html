@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compatibilidad de Brawlers</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            padding: 20px;
+            margin: 0;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        label {
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .result, .error {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .result p, .error p {
+            font-size: 16px;
+        }
+
+        .result {
+            background-color: #e0f7fa;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>Evaluar Compatibilidad</h1>
+    
+    <form action="/relaciones/evaluarRelacion" method="post">
+        <!-- Menú desplegable para Brawler 1 -->
+        <label for="brawler1Id">Brawler 1:</label>
+        <select id="brawler1Id" name="brawler1Id" required>
+            <option value="" disabled selected>Seleccione un brawler</option>
+            <th:block th:each="brawler : ${brawlers}">
+                <option th:value="${brawler.idBrawler}" th:text="${brawler.nombreBrawler}"></option>
+            </th:block>
+        </select>
+
+        <!-- Menú desplegable para Brawler 2 -->
+        <label for="brawler2Id">Brawler 2:</label>
+        <select id="brawler2Id" name="brawler2Id" required>
+            <option value="" disabled selected>Seleccione un brawler</option>
+            <th:block th:each="brawler : ${brawlers}">
+                <option th:value="${brawler.idBrawler}" th:text="${brawler.nombreBrawler}"></option>
+            </th:block>
+        </select>
+
+        <!-- Selector para el tipo de evento -->
+        <label for="tipoEvento">Tipo de Evento:</label>
+        <select id="tipoEvento" name="tipoEvento" required>
+            <option value="" disabled selected>Seleccione un tipo de evento</option>
+            <th:block th:each="tipoEvento : ${tiposEventos}">
+                <option th:value="${tipoEvento.nombre}" th:text="${tipoEvento.nombre}"></option>
+            </th:block>
+        </select>
+
+        <button type="submit">Evaluar</button>
+    </form>
+
+    <!-- Mostrar resultado -->
+    <div class="result" th:if="${resultado != null}">
+        <h2>Resultado</h2>
+        
+        <p><strong>Compatibilidad Anterior:</strong> <span th:text="${resultado['compatibilidadAnterior']}"></span></p>
+        <p><strong>Compatibilidad Nueva:</strong> <span th:text="${resultado['compatibilidadNueva']}"></span></p>
+        
+        <h3>Evento Registrado:</h3>
+        <p><strong>ID Evento:</strong> <span th:text="${resultado['evento'].idEvento}"></span></p>
+        <p><strong>Evento:</strong> <span th:text="${resultado['evento'].tipoEvento.nombre}"></span></p>
+        <p><strong>Descripción del Evento:</strong> <span th:text="${resultado['evento'].descripcionEvento}"></span></p>
+        <p><strong>Fecha del Evento:</strong> <span th:text="${resultado['evento'].fechaEvento}"></span></p>
+        
+        <h3>Brawlers Involucrados:</h3>
+        <p><strong>Brawler 1:</strong> <span th:text="${resultado['evento'].relacion.brawler1.nombreBrawler}"></span> (ID: <span th:text="${resultado['evento'].relacion.brawler1.idBrawler}"></span>)</p>
+        <p><strong>Brawler 2:</strong> <span th:text="${resultado['evento'].relacion.brawler2.nombreBrawler}"></span> (ID: <span th:text="${resultado['evento'].relacion.brawler2.idBrawler}"></span>)</p>
+        
+        <p><strong>Nivel de Relación Actualizado:</strong> <span th:text="${resultado['nivelRelacionActualizado']}"></span></p>
+        
+        <h3>Impacto:</h3>
+        <p><strong>Tipo de Impacto:</strong> <span th:text="${resultado['impacto']}"></span></p>
+        <p><strong>Descripción del Impacto:</strong> <span th:text="${resultado['evento'].descripcionImpacto}"></span></p>
+        
+        <p><strong>Compatibilidad Actual de la Relación:</strong> <span th:text="${resultado['evento'].relacion.compatibilidad}"></span></p>
+    </div>
+
+    <!-- Mostrar error -->
+    <div class="error" th:if="${error != null}">
+        <h2>Error</h2>
+        <p th:text="${error}"></p>
+    </div>
+</body>
+</html>

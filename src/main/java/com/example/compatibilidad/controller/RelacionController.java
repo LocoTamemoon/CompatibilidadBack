@@ -1,11 +1,16 @@
 package com.example.compatibilidad.controller;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.example.compatibilidad.entity.Evento;
 import com.example.compatibilidad.entity.Relacion;
@@ -16,8 +21,8 @@ import com.example.compatibilidad.repository.TipoEventoRepository;
 import com.example.compatibilidad.service.RelacionService;
 
 @RestController
-@RequestMapping("/api/relaciones")  // Cambiado a /api para que sea un endpoint REST
-@CrossOrigin(origins = "http://localhost:3000")  // Permitir acceso desde el frontend (si es necesario)
+@RequestMapping("/api/relaciones")
+@CrossOrigin(origins = "http://localhost:3000")
 public class RelacionController {
 
     @Autowired
@@ -29,7 +34,6 @@ public class RelacionController {
     @Autowired
     private TipoEventoRepository tipoEventoRepository;
 
-    // Endpoint para calcular la compatibilidad y registrar evento
     @PostMapping("/evaluarRelacion")
     public ResponseEntity<Map<String, Object>> evaluarRelacion(@RequestBody RelacionRequest request) {
         try {
@@ -65,13 +69,25 @@ public class RelacionController {
             // Formatear la compatibilidad nueva con el signo correcto
             String compatibilidadNuevaConSigno = (compatibilidadNueva >= 0 ? "+ " : "- ") + Math.abs(compatibilidadNueva);
 
-            // Crear la respuesta con los resultados
-            Map<String, Object> respuesta = new HashMap<>();
-            respuesta.put("compatibilidadAnterior", compatibilidadAnterior);
-            respuesta.put("compatibilidadNueva", compatibilidadNuevaConSigno);  // Usar la versión con signo formateado
-            respuesta.put("evento", evento);  // Incluir el evento completo
-            respuesta.put("nivelRelacionActualizado", relacion.getNivelRelacion().getNivelRelacion());
-            respuesta.put("impacto", evento.getTipoImpacto());  // Usar el impacto del evento directamente
+            // Obtener la compatibilidad actual después del evento
+            Double compatibilidadActual = relacion.getCompatibilidad();
+
+            // Obtener la descripción del impacto
+            String descripcionImpacto = evento.getDescripcionImpacto();  // Asumiendo que tienes un método para obtener la descripción del impacto
+
+            // Crear el HashMap con los resultados organizados según el formato solicitado
+            Map<String, Object> respuesta = new LinkedHashMap<>(); // Usamos LinkedHashMap para garantizar el orden de los elementos
+            respuesta.put("evento", tipoEventoObj.getNombre());  // Nombre del evento
+            respuesta.put("descripcionEvento", tipoEventoObj.getDescripcion());  // Descripción del evento
+            respuesta.put("brawler1Nombre", brawler1.getNombreBrawler());  // Nombre del Brawler 1
+            respuesta.put("brawler2Nombre", brawler2.getNombreBrawler());  // Nombre del Brawler 2
+         
+            respuesta.put("impacto", evento.getTipoImpacto());  // Tipo de impacto del evento
+            respuesta.put("descripcionImpacto", descripcionImpacto);  // Descripción del impacto
+            respuesta.put("compatibilidadAnterior", compatibilidadAnterior);  // Compatibilidad anterior
+            respuesta.put("compatibilidadNueva", compatibilidadNuevaConSigno);  // Compatibilidad nueva con signo
+            respuesta.put("compatibilidadActual", compatibilidadActual);  // Compatibilidad actual de la relación
+            respuesta.put("nivelRelacionActualizado", relacion.getNivelRelacion().getNivelRelacion());  // Nivel de relación actualizado
 
             return ResponseEntity.ok(respuesta);  // Respuesta 200 con los datos
 
@@ -81,6 +97,10 @@ public class RelacionController {
             return ResponseEntity.status(500).body(errorResponse);  // Respuesta 500 si ocurre un error
         }
     }
+
+
+
+
 
     // Clase auxiliar para recibir el cuerpo de la solicitud (JSON)
     public static class RelacionRequest {

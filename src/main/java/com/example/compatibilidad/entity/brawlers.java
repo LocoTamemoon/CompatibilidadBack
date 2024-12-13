@@ -19,11 +19,11 @@ public class brawlers {
     private String nombreBrawler;
 
     @ManyToOne
-    @JoinColumn(name = "personalidad_brawler", referencedColumnName = "idPersonalidad")  // Aquí referenciamos `idPersonalidad` en `Personalidades`
+    @JoinColumn(name = "personalidad_brawler", referencedColumnName = "idPersonalidad")
     private personalidades personalidadBrawler;
 
     @ManyToOne
-    @JoinColumn(name = "preferencia_personalidad", referencedColumnName = "idPersonalidad")  // Igualmente para la preferencia
+    @JoinColumn(name = "preferencia_personalidad", referencedColumnName = "idPersonalidad")
     private personalidades preferenciaPersonalidad;
 
     private int saludBrawler;
@@ -31,4 +31,5 @@ public class brawlers {
     private int speedBrawler;
     private String descripcionBrawler;
     private String imagenBrawler;
+    private String fotoBrawler;  // Nuevo campo agregado
 }

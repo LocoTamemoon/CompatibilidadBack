@@ -20,4 +20,10 @@ public class TipoEvento {
 	    
 	    @Column(name = "descripcion_evento")  // Asegúrate de que el nombre de la columna coincida con el de la base de datos
 	    private String descripcion;  
+	
+
+          @Column(name = "imagen_evento")  // Asegúrate de que el nombre de la columna coincida con el de la base de datos
+	    private String imagenEvento; 
+
+	
 }

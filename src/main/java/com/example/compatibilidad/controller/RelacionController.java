@@ -2,11 +2,13 @@ package com.example.compatibilidad.controller;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,7 +53,7 @@ public class RelacionController {
                     .orElseThrow(() -> new RuntimeException("Brawler 2 no encontrado"));
 
             // Registrar o actualizar la relación
-            Relacion relacion = relacionService.obtenerRelacion(brawler1, brawler2);
+            Relacion relacion = relacionService.obtenerRelacion(brawler1, brawler2, request.getUid());
 
             // Calcular compatibilidad anterior
             Double compatibilidadAnterior = relacion.getCompatibilidad();
@@ -61,7 +63,7 @@ public class RelacionController {
                     .orElseThrow(() -> new RuntimeException("Tipo de evento no encontrado"));
 
             // Registrar el evento
-            Evento evento = relacionService.registrarEvento(relacion.getIdRelacion(), request.getTipoEvento(), tipoEventoObj.getDescripcion());
+            Evento evento = relacionService.registrarEvento(relacion.getIdRelacion(), request.getTipoEvento(), tipoEventoObj.getDescripcion(), request.getUid());
 
             // Calcular la compatibilidad nueva como la diferencia
             Double compatibilidadNueva = relacion.getCompatibilidad() - compatibilidadAnterior;
@@ -98,15 +100,12 @@ public class RelacionController {
         }
     }
 
-
-
-
-
     // Clase auxiliar para recibir el cuerpo de la solicitud (JSON)
     public static class RelacionRequest {
         private Long brawler1Id;
         private Long brawler2Id;
         private String tipoEvento;
+        private String uid;  // Añadido el campo UID para el parámetro que falta
 
         public Long getBrawler1Id() {
             return brawler1Id;
@@ -131,5 +130,19 @@ public class RelacionController {
         public void setTipoEvento(String tipoEvento) {
             this.tipoEvento = tipoEvento;
         }
+
+        public String getUid() {
+            return uid;
+        }
+
+        public void setUid(String uid) {
+            this.uid = uid;
+        }
+    }
+
+
+    @GetMapping
+    public List<Relacion> listarRelaciones() {
+        return relacionService.listarRelaciones();
     }
 }

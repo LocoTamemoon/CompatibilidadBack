@@ -1,6 +1,7 @@
 package com.example.compatibilidad.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,23 +134,28 @@ public class RelacionService {
         return (compatibilidadSalud + compatibilidadDaño + compatibilidadVelocidad) / 3.0;
     }
 
- // Crear o actualizar la relación entre dos brawlers
-    public Relacion obtenerRelacion(brawlers brawler1, brawlers brawler2) {
+    public Relacion obtenerRelacion(brawlers brawler1, brawlers brawler2, String uid) {
         // Validar que los brawlers no sean nulos
         if (brawler1 == null || brawler2 == null) {
             throw new IllegalArgumentException("Los brawlers no pueden ser nulos");
         }
 
-        // Buscar la relación en ambos órdenes (brawler1 -> brawler2 y brawler2 -> brawler1)
-        Optional<Relacion> relacionOpt = relacionRepository.findByBrawler1AndBrawler2(brawler1, brawler2)
-                .or(() -> relacionRepository.findByBrawler1AndBrawler2(brawler2, brawler1));
+        // Si uid es nulo o vacío, asignar "administrador" como valor predeterminado
+        final String finalUid = (uid == null || uid.isEmpty()) ? "administrador" : uid;
+
+        // Buscar la relación en ambos órdenes (brawler1 -> brawler2 y brawler2 -> brawler1) con el UID
+        Optional<Relacion> relacionOpt = relacionRepository.findByBrawler1AndBrawler2AndUid(brawler1, brawler2, finalUid)
+                .or(() -> relacionRepository.findByBrawler1AndBrawler2AndUid(brawler2, brawler1, finalUid));
 
         if (relacionOpt.isPresent()) {
-            return relacionOpt.get();  // Si la relación ya existe, devolverla
+            // Si la relación existe para el mismo UID, devolverla
+            return relacionOpt.get();
         } else {
+            // Si la relación no existe para este UID, crear una nueva relación
             Relacion nuevaRelacion = new Relacion();
             nuevaRelacion.setBrawler1(brawler1);
             nuevaRelacion.setBrawler2(brawler2);
+            nuevaRelacion.setUid(finalUid); // Asignar el UID a la relación
 
             // Obtener el nivel de relación "Conocidos" en la primera interacción
             NivelRelacion nivel = nivelRelacionRepository.findByNivelRelacion("Conocidos")
@@ -163,19 +169,20 @@ public class RelacionService {
     }
 
 
-    // Registrar un evento y actualizar la relación entre los brawlers
-    public Evento registrarEvento(Long idRelacion, String tipoEvento, String descripcionEvento) {
+
+
+
+
+
+    public Evento registrarEvento(Long idRelacion, String tipoEvento, String descripcionEvento, String uid) {
         // Validar que los parámetros no sean nulos
-        if (idRelacion == null || tipoEvento == null || descripcionEvento == null) {
+        if (idRelacion == null || tipoEvento == null || descripcionEvento == null || uid == null || uid.isEmpty()) {
             throw new IllegalArgumentException("Los parámetros no pueden ser nulos");
         }
 
         // Obtener la relación
         Relacion relacion = relacionRepository.findById(idRelacion)
                 .orElseThrow(() -> new RuntimeException("Relación no encontrada"));
-
-        // Obtener la compatibilidad actualizada de la relación
-        double compatibilidadActualizada = relacion.getCompatibilidad();
 
         // Obtener el tipo de evento
         TipoEvento tipo = tipoEventoRepository.findByNombre(tipoEvento)
@@ -186,9 +193,10 @@ public class RelacionService {
         evento.setRelacion(relacion);
         evento.setTipoEvento(tipo);
 
-        // Aquí es donde actualizamos el descripcion_evento con el valor de tipo_evento
-        evento.setDescripcionEvento(tipo.getDescripcion());
+        // Aquí es donde se establece el UID
+        evento.setDescripcionEvento(descripcionEvento);
         evento.setFechaEvento(LocalDateTime.now());
+        evento.setUid(uid);  // Establecer el UID
 
         // Determinar el impacto de manera aleatoria (positivo o negativo)
         String tipoImpacto = (Math.random() < 0.5) ? "Positivo" : "Negativo";  // Aleatorio 50% positivo o negativo
@@ -198,7 +206,7 @@ public class RelacionService {
                 .findByTipoEventoAndTipoImpacto(tipo, tipoImpacto);
 
         // Usar la descripción desde ImpactoEvento si existe
-        String descripcionImpacto = impacto.isPresent() ? impacto.get().getDescripcionImpacto() : 
+        String descripcionImpacto = impacto.isPresent() ? impacto.get().getDescripcionImpacto() :
                                     (tipoImpacto.equals("Positivo") ? "Impacto positivo en la relación" : "Impacto negativo en la relación");
 
         // Asignar el impacto y la descripción
@@ -213,17 +221,17 @@ public class RelacionService {
 
         // Incremento de compatibilidad dependiendo del tipo de evento
         if (tipoEvento.equals("Conflicto")) {
-            incrementoCompatibilidad = (tipoImpacto.equals("Positivo")) ? 0.1 : -0.1;
+            incrementoCompatibilidad = (tipoImpacto.equals("Positivo")) ? 0.11 : -0.05;
         } else if (tipoEvento.equals("Alianza")) {
-            incrementoCompatibilidad = (tipoImpacto.equals("Positivo")) ? 0.2 : -0.1;
+            incrementoCompatibilidad = (tipoImpacto.equals("Positivo")) ? 0.13 : -0.08;
         } else if (tipoEvento.equals("Desafío")) {
-            incrementoCompatibilidad = (tipoImpacto.equals("Positivo")) ? 0.15 : -0.2;
+            incrementoCompatibilidad = (tipoImpacto.equals("Positivo")) ? 0.10 : -0.04;
         } else if (tipoEvento.equals("Reunión")) {
-            incrementoCompatibilidad = (tipoImpacto.equals("Positivo")) ? 0.1 : -0.05;
+            incrementoCompatibilidad = (tipoImpacto.equals("Positivo")) ? 0.17 : -0.10;
         }
 
         // Actualizamos la compatibilidad
-        compatibilidadActualizada += incrementoCompatibilidad;
+        double compatibilidadActualizada = relacion.getCompatibilidad() + incrementoCompatibilidad;
         if (compatibilidadActualizada > 1.0) compatibilidadActualizada = 1.0;
         if (compatibilidadActualizada < 0.0) compatibilidadActualizada = 0.0;
 
@@ -247,5 +255,14 @@ public class RelacionService {
         relacionRepository.save(relacion);
 
         return evento;
+    }
+
+
+
+
+
+    
+    public List<Relacion> listarRelaciones() {
+        return relacionRepository.findAll();
     }
 }

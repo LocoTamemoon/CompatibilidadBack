@@ -1,4 +1,5 @@
 package com.example.compatibilidad.entity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -30,4 +31,8 @@ public class Evento {
 
     private String tipoImpacto; // Tipo de impacto (Positivo/Negativo)
     private String descripcionImpacto;
+    
+    @Column(name = "uid")
+    private String uid;
+
 }

@@ -10,5 +10,5 @@ import com.example.compatibilidad.entity.Relacion;
 
 @Repository
 public interface RelacionRepository extends JpaRepository<Relacion, Long> {
-    Optional<Relacion> findByBrawler1AndBrawler2(brawlers brawler1, brawlers brawler2);
+	Optional<Relacion> findByBrawler1AndBrawler2AndUid(brawlers brawler1, brawlers brawler2, String uid);
 }

@@ -1,5 +1,6 @@
 package com.example.compatibilidad.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -145,4 +147,37 @@ public class RelacionController {
     public List<Relacion> listarRelaciones() {
         return relacionService.listarRelaciones();
     }
+    
+    
+    
+    @GetMapping("/listar/{uid}")
+    public ResponseEntity<List<Map<String, Object>>> listarRelacionesPorUid(@PathVariable String uid) {
+        List<Relacion> relaciones = relacionService.listarRelacionesPorUid(uid);
+
+        if (relaciones.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        List<Map<String, Object>> resultado = new ArrayList<>();
+
+        // Mapear las relaciones al formato deseado usando LinkedHashMap
+        for (Relacion relacion : relaciones) {
+            Map<String, Object> relacionMap = new LinkedHashMap<>();
+
+            relacionMap.put("ID Relacion", relacion.getIdRelacion());
+            relacionMap.put("Nombre del Primer Personaje", relacion.getBrawler1().getNombreBrawler());
+            relacionMap.put("Imagen del Primer Personaje", relacion.getBrawler1().getImagenBrawler());
+
+            relacionMap.put("Nombre del Segundo Personaje", relacion.getBrawler2().getNombreBrawler());
+            relacionMap.put("Imagen del Segundo Personaje", relacion.getBrawler2().getImagenBrawler());
+
+            relacionMap.put("Nivel de Relacion", relacion.getNivelRelacion().getNivelRelacion());
+            relacionMap.put("Compatibilidad", relacion.getCompatibilidad());
+
+            resultado.add(relacionMap);
+        }
+
+        return ResponseEntity.ok(resultado);
+    }
+    
 }

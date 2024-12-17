@@ -11,4 +11,7 @@ import com.example.compatibilidad.entity.Relacion;
 @Repository
 public interface EventoRepository extends JpaRepository<Evento, Long> {
     List<Evento> findByRelacion(Relacion relacion);
+    
+    List<Evento> findByUid(String uid);
+
 }

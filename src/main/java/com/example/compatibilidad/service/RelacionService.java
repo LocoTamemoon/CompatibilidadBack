@@ -265,4 +265,14 @@ public class RelacionService {
     public List<Relacion> listarRelaciones() {
         return relacionRepository.findAll();
     }
+    
+    
+    
+    
+    public List<Relacion> listarRelacionesPorUid(String uid) {
+        return relacionRepository.findByUid(uid);
+    }
+    
+    
+    
 }

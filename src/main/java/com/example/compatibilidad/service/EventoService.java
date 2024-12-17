@@ -16,4 +16,8 @@ public class EventoService {
     public List<Evento> obtenerTodosEventos() {
         return eventoRepository.findAll();  // Obtiene todos los eventos
     }
+    
+    public List<Evento> listarEventosPorUid(String uid) {
+        return eventoRepository.findByUid(uid);
+    }
 }

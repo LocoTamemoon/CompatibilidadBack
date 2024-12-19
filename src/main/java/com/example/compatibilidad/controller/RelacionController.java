@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.compatibilidad.entity.Evento;
@@ -108,6 +110,7 @@ public class RelacionController {
         private Long brawler2Id;
         private String tipoEvento;
         private String uid;  // Añadido el campo UID para el parámetro que falta
+        private Long nivelRelacionId;  // Añadido el campo nivelRelacionId
 
         public Long getBrawler1Id() {
             return brawler1Id;
@@ -140,7 +143,16 @@ public class RelacionController {
         public void setUid(String uid) {
             this.uid = uid;
         }
+
+        public Long getNivelRelacionId() {
+            return nivelRelacionId;  // Devolvemos el nivel de relación
+        }
+
+        public void setNivelRelacionId(Long nivelRelacionId) {
+            this.nivelRelacionId = nivelRelacionId;  // Establecemos el nivel de relación
+        }
     }
+
 
 
     @GetMapping
@@ -179,5 +191,28 @@ public class RelacionController {
 
         return ResponseEntity.ok(resultado);
     }
+    
+    
+    
+    
+    // Método PUT para actualizar el nivel de relación
+    @PutMapping("/editar/{idRelacion}")
+    public ResponseEntity<Relacion> editarRelacion(
+            @PathVariable Long idRelacion,  // El ID de la relación que se va a editar
+            @RequestBody RelacionRequest relacionRequest) {  // Recibe el nivel de relación y el UID
+
+        Relacion updatedRelacion = relacionService.editarNivelRelacion(
+                idRelacion, 
+                relacionRequest.getNivelRelacionId(), 
+                relacionRequest.getUid()
+        );
+
+        if (updatedRelacion != null) {
+            return ResponseEntity.ok(updatedRelacion);  // Si la relación fue editada correctamente
+        } else {
+            return ResponseEntity.notFound().build();  // Si la relación no fue encontrada
+        }
+    }
+
     
 }

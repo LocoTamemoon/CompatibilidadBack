@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import com.example.compatibilidad.entity.NivelRelacion;
 
 @Repository
-public interface NivelRelacionRepository extends JpaRepository<NivelRelacion, Integer> {
+public interface NivelRelacionRepository extends JpaRepository<NivelRelacion, Long> {
 
 	public Optional<NivelRelacion> findByNivelRelacion(String nivelRelacion);
 }

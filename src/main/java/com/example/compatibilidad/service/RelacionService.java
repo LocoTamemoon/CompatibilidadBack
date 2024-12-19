@@ -275,4 +275,55 @@ public class RelacionService {
     
     
     
+    
+    
+    public Relacion editarNivelRelacion(Long idRelacion, Long nivelRelacionId, String uid) {
+        if (idRelacion == null || idRelacion == 0) {
+            throw new IllegalArgumentException("El idRelacion no puede ser nulo o cero.");
+        }
+
+        // Buscar la relación por ID
+        Relacion relacion = relacionRepository.findById(idRelacion).orElse(null);
+
+        if (relacion == null) {
+            return null;  // Si la relación no existe, retornamos null
+        }
+
+        // Verificar que el UID coincida (para seguridad)
+        if (!relacion.getUid().equals(uid)) {
+            return null;  // Si el UID no coincide, retornamos null
+        }
+
+        // Obtener el nuevo nivel de relación por ID
+        NivelRelacion nuevoNivelRelacion = nivelRelacionRepository.findById(nivelRelacionId).orElse(null);
+
+        if (nuevoNivelRelacion == null) {
+            return null;  // Si no se encuentra el nuevo nivel de relación, retornamos null
+        }
+
+        // Asignamos el nuevo nivel de relación
+        relacion.setNivelRelacion(nuevoNivelRelacion);
+
+        // Ajustamos la compatibilidad según el nivel de relación
+        switch (nuevoNivelRelacion.getNivelRelacion()) {
+            case "Pareja":
+                relacion.setCompatibilidad(0.70);
+                break;
+            case "Amigos":
+                relacion.setCompatibilidad(0.49);
+                break;
+            case "Conocidos":
+                relacion.setCompatibilidad(0.01);
+                break;
+            default:
+                relacion.setCompatibilidad(0.0);  // Valor por defecto en caso de un nivel desconocido
+                break;
+        }
+
+        // Guardamos los cambios en la base de datos
+        return relacionRepository.save(relacion);
+    }
+
+    
+    
 }

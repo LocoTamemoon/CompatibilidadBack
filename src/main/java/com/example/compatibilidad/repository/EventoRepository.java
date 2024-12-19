@@ -9,9 +9,8 @@ import com.example.compatibilidad.entity.Evento;
 import com.example.compatibilidad.entity.Relacion;
 
 @Repository
-public interface EventoRepository extends JpaRepository<Evento, Long> {
+public interface EventoRepository extends JpaRepository<Evento, Integer> {  // Cambia Long por Integer
     List<Evento> findByRelacion(Relacion relacion);
     
     List<Evento> findByUid(String uid);
-
 }
